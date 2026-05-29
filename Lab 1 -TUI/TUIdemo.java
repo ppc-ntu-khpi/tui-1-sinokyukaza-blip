@@ -1,5 +1,10 @@
 package com.mybank.tui;
 
+import com.mybank.domain.Account;
+import com.mybank.domain.Bank;
+import com.mybank.domain.CheckingAccount;
+import com.mybank.domain.Customer;
+import com.mybank.domain.SavingsAccount;
 import jexer.TAction;
 import jexer.TApplication;
 import jexer.TField;
@@ -60,21 +65,97 @@ public class TUIdemo extends TApplication {
     }
 
     private void ShowCustomerDetails() {
-        TWindow custWin = addWindow("Customer Window", 2, 1, 40, 10, TWindow.NOZOOMBOX);
-        custWin.newStatusBar("Enter valid customer number and press Show...");
 
-        custWin.addLabel("Enter customer number: ", 2, 2);
-        TField custNo = custWin.addField(24, 2, 3, false);
-        TText details = custWin.addText("Owner Name: \nAccount Type: \nAccount Balance: ", 2, 4, 38, 8);
-        custWin.addButton("&Show", 28, 2, new TAction() {
+        TWindow custWin = addWindow(
+                "Customer Window",
+                2,
+                1,
+                50,
+                14,
+                TWindow.NOZOOMBOX
+        );
+
+        custWin.newStatusBar(
+                "Enter customer number and press Show..."
+        );
+
+        custWin.addLabel("Enter customer number:", 2, 2);
+
+        TField custNo = custWin.addField(
+                26,
+                2,
+                5,
+                false
+        );
+
+        TText details = custWin.addText(
+                "Customer information will appear here...",
+                2,
+                5,
+                44,
+                6
+        );
+
+        custWin.addButton("&Show", 35, 2, new TAction() {
+
             @Override
             public void DO() {
+
                 try {
-                    int custNum = Integer.parseInt(custNo.getText());
-                    //details about customer with index==custNum
-                    details.setText("Owner Name: John Doe (id="+custNum+")\nAccount Type: 'Checking'\nAccount Balance: $200.00");
+
+                    int custNum = Integer.parseInt(
+                            custNo.getText()
+                    );
+
+                    // Create bank
+                    Bank bank = new Bank();
+
+                    // Create customers
+                    Customer customer1 =
+                            new Customer("John", "Doe");
+
+                    Customer customer2 =
+                            new Customer("Jane", "Smith");
+
+                    // Add accounts
+                    customer1.addAccount(
+                            new CheckingAccount(500.0)
+                    );
+
+                    customer2.addAccount(
+                            new SavingsAccount(1200.0, 0.05)
+                    );
+
+                    // Add customers to bank
+                    bank.addCustomer(customer1);
+                    bank.addCustomer(customer2);
+
+                    // Get customer
+                    Customer customer =
+                            bank.getCustomer(custNum);
+
+                    Account account =
+                            customer.getAccount(0);
+
+                    details.setText(
+                            "Customer ID: " + custNum +
+                            "\nOwner Name: "
+                            + customer.getFirstName()
+                            + " "
+                            + customer.getLastName()
+                            + "\nAccount Type: "
+                            + account.getClass()
+                                    .getSimpleName()
+                            + "\nBalance: $"
+                            + account.getBalance()
+                    );
+
                 } catch (Exception e) {
-                    messageBox("Error", "You must provide a valid customer number!").show();
+
+                    messageBox(
+                            "Error",
+                            "Invalid customer number!"
+                    ).show();
                 }
             }
         });
